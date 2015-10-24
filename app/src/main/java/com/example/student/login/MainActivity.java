@@ -1,7 +1,6 @@
 package com.example.student.login;
 
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -13,19 +12,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.student.login.util.Preference;
-
-import java.util.ArrayList;
+import com.example.student.login.util.User;
 
 
 public class MainActivity extends ActionBarActivity {
 
     private Button mButton;
     private TextView mTextMessage;
+    private TextView mTextView;
     private EditText mEditText1;
     private EditText mEditText2;
     private EditText mEditText3;
     private EditText mEditText4;
-    private ArrayList<Integer> _pwd = new ArrayList<>();
+    private User user = new User();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,35 +32,47 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         final Preference pf = new Preference();
-
+        final String loginPassword = pf.getLoginPassword(getApplicationContext());
 
         mButton = (Button) findViewById(R.id.button);
+        mTextView = (TextView) findViewById(R.id.textView);
         mTextMessage = (TextView) findViewById(R.id.textMessage);
         mEditText1 = (EditText) findViewById(R.id.editText1);
         mEditText2 = (EditText) findViewById(R.id.editText2);
         mEditText3 = (EditText) findViewById(R.id.editText3);
         mEditText4 = (EditText) findViewById(R.id.editText4);
 
+        if (loginPassword.length() > 0) {
+            mTextView.setText("パスコード入力");
+            mTextMessage.setText("passwd:" + pf.getLoginPassword(getApplicationContext()));
+            mButton.setText("解除");
+        }
+
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (kara_check(mEditText1) && kara_check(mEditText2) && kara_check(mEditText3)
                         && kara_check(mEditText4)) {
-                    set_pwd(Integer.parseInt(String.valueOf(mEditText1.getText())));
-                    set_pwd(Integer.parseInt(String.valueOf(mEditText2.getText())));
-                    set_pwd(Integer.parseInt(String.valueOf(mEditText3.getText())));
-                    set_pwd(Integer.parseInt(String.valueOf(mEditText4.getText())));
+                    user.set_pwd(Integer.parseInt(String.valueOf(mEditText1.getText())));
+                    user.set_pwd(Integer.parseInt(String.valueOf(mEditText2.getText())));
+                    user.set_pwd(Integer.parseInt(String.valueOf(mEditText3.getText())));
+                    user.set_pwd(Integer.parseInt(String.valueOf(mEditText4.getText())));
 //                    mTextMessage.setText( get_pwd());
-                    pf.putLoginPassword(getApplicationContext(),get_pwd().replaceAll("[^0-9]",""));
-                    showToast(pf.getLoginPassword(getApplicationContext()));
-
+                    if (loginPassword.length() == 0) {
+                        pf.putLoginPassword(getApplicationContext(), user.get_pwd());
+//                    showToast(pf.getLoginPassword(getApplicationContext()));
+                    } else {
+                        showToast(loginPassword);
+                        showToast(user.get_pwd());
+                        if (loginPassword.equals(user.get_pwd())) {
+                            Intent intent = new Intent(MainActivity.this, HogeActivity.class);
+                            startActivity(intent);
+                        } else {
+                            reset_input();
+                        }
+                    }
                 } else {
-                    mEditText1.setText("");
-                    mEditText2.setText("");
-                    mEditText3.setText("");
-                    mEditText4.setText("");
-                    mTextMessage.setText("入力エラーだよ");
-                    reset_pwd();
+                    reset_input();
                 }
 
             }
@@ -90,18 +101,14 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void reset_pwd() {
-        this._pwd.clear();
+    public void reset_input() {
+        mEditText1.setText("");
+        mEditText2.setText("");
+        mEditText3.setText("");
+        mEditText4.setText("");
+        mTextMessage.setText("入力エラーだよ");
+        user.reset_pwd();
     }
-
-    public String get_pwd() {
-        return this._pwd.toString();
-    }
-
-    public void set_pwd(int num) {
-        this._pwd.add(num);
-    }
-
 
     public boolean kara_check(EditText editText) {
         if (editText.getText().toString().equals("")) {
