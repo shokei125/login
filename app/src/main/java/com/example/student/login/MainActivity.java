@@ -57,7 +57,6 @@ public class MainActivity extends ActionBarActivity {
                     user.set_pwd(Integer.parseInt(String.valueOf(mEditText2.getText())));
                     user.set_pwd(Integer.parseInt(String.valueOf(mEditText3.getText())));
                     user.set_pwd(Integer.parseInt(String.valueOf(mEditText4.getText())));
-//                    mTextMessage.setText( get_pwd());
                     if (loginPassword.length() == 0) {
                         pf.putLoginPassword(getApplicationContext(), user.get_pwd());
 //                    showToast(pf.getLoginPassword(getApplicationContext()));
